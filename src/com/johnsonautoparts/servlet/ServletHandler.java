@@ -550,7 +550,10 @@ public class ServletHandler extends HttpServlet {
 			} else {
 				// avoid parameter overloading attack and only select the first
 				// item in the array
-				loginParams.put("secure_form", paramsMap.get("secure_form")[0]);
+			    String secureFormString = paramsMap.get("secure_form")[0];
+			    // ensure its a boolean 
+                Boolean secureForm = Boolean.parseBoolean(secureFormString);
+				loginParams.put("secure_form", secureForm.toString());
 			}
 
 			return loginParams;
