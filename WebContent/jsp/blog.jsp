@@ -1,6 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="org.owasp.html.PolicyFactory"%>
-<%@page import="org.owasp.html.HtmlPolicyBuilder" %>
+<%@page import="com.johnsonautoparts.Project4"%>
 <%
 	/**
 	 * Project 4, Milestone 1, Task 5
@@ -44,7 +43,7 @@
 			 * the user so they can make edits before submitting the data.
 			 */
 			%>
-		<tr><td><textarea name='param1'><%= request.getParameter("blog") %></textarea>
+		<tr><td><textarea name='param1'><%= Project4.sanitizeForBlog(request.getParameter("blog")) %></textarea>
 		<tr><td><br/></td></tr>
 			</table>
 		<input type='hidden' name='project' value='project4'/>

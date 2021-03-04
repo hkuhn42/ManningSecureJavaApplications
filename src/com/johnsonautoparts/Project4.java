@@ -2,8 +2,6 @@ package com.johnsonautoparts;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -26,6 +24,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.Function;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -63,6 +62,10 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
 import org.owasp.encoder.Encode;
+import org.owasp.html.HtmlPolicyBuilder;
+import org.owasp.html.HtmlSanitizer;
+import org.owasp.html.HtmlStreamEventReceiver;
+import org.owasp.html.PolicyFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -309,7 +312,7 @@ public class Project4 extends Project {
 			String sql = "INSERT INTO blog(blog) VALUES (?)";
 
 			try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-				stmt.setString(1, blogEntry);
+				stmt.setString(1, sanitizeForBlog(blogEntry));
 
 				// execute the insert
 				int rows = stmt.executeUpdate();
@@ -1046,6 +1049,18 @@ public class Project4 extends Project {
 			throw new AppException(
 					"encryptPassword got algo exception: " + nse.getMessage());
 		}
-
 	}
+	
+	private static final PolicyFactory BLOG_SANITIZER = new HtmlPolicyBuilder().allowElements("p","table",  "div", "tr", "td").toFactory();
+	
+	/**
+	 * Sanitize the raw string for blog posts 
+	 * (HTML tags P,TABLE,DIV,TR,TD allowed)
+	 * 
+	 * @param raw the raw string
+	 * @return the sanitized string
+	 */
+	public static String sanitizeForBlog(String raw) {
+		return BLOG_SANITIZER.sanitize(raw);
+	}	
 }
