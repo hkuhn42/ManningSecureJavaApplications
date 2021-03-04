@@ -27,7 +27,7 @@
 	<form action="<%=request.getServletContext().getContextPath() %>/app" method='GET'>
 	<table>
 		<tr><td>Please verify your comment before submission:</td></tr>
-		<tr><td><textarea name='param1'><%= request.getParameter("comments") %></textarea>
+		<tr><td><textarea name='param1'><%= Encode.forHtml(request.getParameter("comments")) %></textarea>
 		<tr><td><br/></td></tr>
 			</table>
 		<input type='hidden' name='project' value='project4'/>
