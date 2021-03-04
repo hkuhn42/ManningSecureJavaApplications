@@ -61,6 +61,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.log4j.Logger;
 import org.owasp.encoder.Encode;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -263,15 +264,9 @@ public class Project4 extends Project {
 								+ txtField);
 			}
 		} catch (IllegalStateException ise) {
-			// convert the printstack to a string for better debugging
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-
-			// call printStackTrace to the print/string
-			ise.printStackTrace(pw);
-
-			// return the error as the content
-			return sw.toString();
+			Logger.getLogger(Project4.class).error("getAttribute failed for "+field, ise);
+			// return a message
+			return "Ups, an error has occured, please try again or contact support";
 		}
 
 	}
