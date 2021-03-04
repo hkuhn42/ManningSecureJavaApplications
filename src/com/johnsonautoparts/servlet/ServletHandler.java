@@ -1,12 +1,11 @@
 package com.johnsonautoparts.servlet;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -51,49 +50,7 @@ public class ServletHandler extends HttpServlet {
 		super();
 	}
 
-	/**
-	 * Project 4, Milestone 1, Task 6
-	 * 
-	 * TITLE: Do not add main() method to a webapp
-	 * 
-	 * RISK: A main() method may not be reachable by an attacker, but it should
-	 * not be included in a production environment. A main() method may also
-	 * leak sensitive information or allow an attacker with access to the WAR
-	 * with additional access.
-	 * 
-	 * REF: SonarSource RSPEC-2653
-	 * 
-	 */
-	/**
-	 * Out of band used test functions of WAR
-	 */
-	public static void main(String[] args) {
-		if (!(args.length > 0)) {
-			System.err.println("Missing argument");
-			System.exit(1);
-		}
-
-		switch (args[0]) {
-			case "database" :
-				try {
-					Connection connection = DB.getDbConnection(null);
-					try (PreparedStatement stmt = connection
-							.prepareStatement("SELECT COUNT(*) FROM tasks")) {
-						// do nothing
-					}
-				} catch (DBException dbe) {
-					dbe.printStackTrace();
-				} catch (SQLException sqe) {
-					sqe.printStackTrace();
-				}
-
-				break;
-
-			default :
-				System.err.println("Function " + args[0] + " not implemented");
-				System.exit(1);
-		}
-	}
+	
 
 	/**
 	 * Handle POST request
