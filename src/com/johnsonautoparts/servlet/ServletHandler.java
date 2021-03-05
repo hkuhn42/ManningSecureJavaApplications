@@ -280,7 +280,6 @@ public class ServletHandler extends HttpServlet {
 					String project = params.get("project");
 
 					// minimize code by using reflection to discover classes and methods
-					// this is a bad idea but that is not part of the task ;)
 					Project projectClass = getProjectClass(project,
 							getConnection(request), request, response);
 					Method method = getProjectMethod(projectClass.getClass(), params);
@@ -342,6 +341,7 @@ public class ServletHandler extends HttpServlet {
 
 					} catch (NumberFormatException nfe) {
 						nfe.printStackTrace();
+						AppLogger.log(project);
 						throw new AppException(
 								"caught NumFormatException: " + nfe.getMessage(),
 								"application error");
@@ -374,7 +374,7 @@ public class ServletHandler extends HttpServlet {
 				// throw ServletException for processing
 				catch (AppException ae) {
 					AppLogger.log("Caught AppException: " + ae.getPrivateMessage());
-					throw new ServletException(ae.getPrivateMessage());
+					ServletUtilities.sendError(response, "internal error");
 				}
 
 				break;
@@ -501,7 +501,7 @@ public class ServletHandler extends HttpServlet {
 		// throw ServletException for processing
 		catch (AppException ae) {
 			AppLogger.log("Caught AppException: " + ae.getPrivateMessage());
-			throw new ServletException(ae.getPrivateMessage());
+			ServletUtilities.sendError(response, "internal error");
 		}
 
 	}
