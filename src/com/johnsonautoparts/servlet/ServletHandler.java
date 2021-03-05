@@ -269,9 +269,113 @@ public class ServletHandler extends HttpServlet {
 				 * goes through a proxy server or other service, the data could
 				 * also be leaked.
 				 */
-				// nothing matched so process as a GET
-				AppLogger.log("Cannot process POST request, forwarding to GET");
-				doGet(request, response);
+
+				// main logic to parse other actions 
+				// we assume all posts getting here use application/x-www-form-urlencoded so we can still use params
+				try {
+					// check and load the params map from sent parameters
+					Map<String, String> params = parseParams(request);
+
+					// assign the project variable
+					String project = params.get("project");
+
+					// minimize code by using reflection to discover classes and methods
+					// this is a bad idea but that is not part of the task ;)
+					Project projectClass = getProjectClass(project,
+							getConnection(request), request, response);
+					Method method = getProjectMethod(projectClass.getClass(), params);
+
+					try {
+						String paramVal = params.get("param_value");
+						String paramType = params.get("param_type");
+
+						// String for the content
+						Object responseData = null;
+
+						// handle methods with a string parameter
+						if (paramType.equals("String")) {
+							responseData = method.invoke(projectClass, paramVal);
+						}
+
+						// this is a bad idea to just attempt to convert a string to an
+						// integer
+						// even when catching NumberFormatException but we use it here
+						// to simply
+						// the code base since this portion of the code is not reviewed
+						// in the project
+						else if (paramType.equals("Integer")) {
+							int paramInt = Integer.parseInt(paramVal);
+
+							responseData = method.invoke(projectClass, paramInt);
+						}
+
+						else {
+							AppLogger.log(request.getSession().getId()
+									+ " cannot parse paramtype and invoke method");
+							ServletUtilities.sendError(response,
+									"incorrect parameters");
+							throw new AppException(
+									"Cannot parse paramtype and invoke method",
+									"application error");
+						}
+
+						// update the responseData
+						if (response.getContentType() != null && responseData != null) {
+							// check for JSON object returned
+							if (responseData instanceof JsonObject) {
+								responseContent = responseData.toString();
+							}
+							// check for XML data
+							else if (response.getContentType().contains("xml")) {
+								responseContent = responseData.toString();
+							}
+							// return default json data
+							else {
+								JsonObject jsonContent = Json.createObjectBuilder()
+										.add("status", "ok")
+										.add("message", responseData.toString())
+										.build();
+								responseContent = jsonContent.toString();
+							}
+							// all other responses use the default message
+						}
+
+					} catch (NumberFormatException nfe) {
+						nfe.printStackTrace();
+						throw new AppException(
+								"caught NumFormatException: " + nfe.getMessage(),
+								"application error");
+					} catch (IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException iiie) {
+						iiie.printStackTrace();
+						throw new AppException(
+								"caught illegal exception: " + iiie.getMessage(),
+								"application error");
+					}
+
+					// send successful response
+					PrintWriter out = response.getWriter();
+					out.println(responseContent);
+				}
+
+				/**
+				 * Project 4, Milestone 2, Task 3
+				 * 
+				 * TITLE: Servlet must not throw errors
+				 * 
+				 * RISK: If the servlet of the webapp throws an error it may not be
+				 * processed in the expected fashion. This could include causing the
+				 * webapp to crash or become unstable. If the exception is handled, the
+				 * application server may report the entire exception stack back to the
+				 * user which could include sensitive information.
+				 * 
+				 * REF: SonarSource RSPEC-1989
+				 */
+				// throw ServletException for processing
+				catch (AppException ae) {
+					AppLogger.log("Caught AppException: " + ae.getPrivateMessage());
+					throw new ServletException(ae.getPrivateMessage());
+				}
 
 				break;
 		}
