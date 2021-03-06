@@ -21,6 +21,8 @@ import com.johnsonautoparts.logger.AppLogger;
  *
  */
 public class SecurityFilter implements Filter {
+	
+	private String contentSecurityPolicy = null;
 	/**
 	 * Called by the web container to indicate to a filter that it is being
 	 * placed into service. The servlet container calls the init method exactly
@@ -31,7 +33,7 @@ public class SecurityFilter implements Filter {
 	 *            configuration object
 	 */
 	public void init(FilterConfig filterConfig) {
-		// initializing steps
+		contentSecurityPolicy = filterConfig.getInitParameter("contentSecurityPolicy");
 	}
 
 	/**
@@ -54,7 +56,6 @@ public class SecurityFilter implements Filter {
 			FilterChain chain) throws IOException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
-		final String SERVER_HOSTNAME = "localhost";
 
 		try {
 			/**
@@ -79,33 +80,36 @@ public class SecurityFilter implements Filter {
 			 * headers have been relaxed, this error needs to be fixed as well.
 			 */
 			// AJAX problems so add headers to relax Cross Origin issues
-			// TODO: resolve on the GUI to remove this
-			response.setHeader("Access-Control-Allow-Origin", "*");
-			response.setHeader("Access-Control-Allow-Credentials", "true");
-			response.setHeader("Access-Control-Allow-Methods", "GET");
-
+			
+			// the tomcat default httpHeader security filter is configured in web.xml to address basic headers
+			// the tomcat default CORS filter configuration in web.xml must be completed after UI is build
+			// add a csp header if set in web.xml to reduce xss risk
+			if(contentSecurityPolicy != null && contentSecurityPolicy.length() > 0) {
+				response.setHeader("Content-Security-Policy", contentSecurityPolicy);	
+				// IE10/IE11
+				response.setHeader("X-Content-Security-Policy", contentSecurityPolicy);	
+			}
+			
 			// throw an exception if a method other than GET or POST is sent
 			if (request.getMethod().equalsIgnoreCase("GET")) {
 				// do something with valid GET request
 			}
-
 			else if (request.getMethod().equalsIgnoreCase("POST")) {
 				// do something with valid POST request
 			}
-
 			/**
 			 * unknown method Send request to /accessdenied.jsp
 			 */
 			else {
 				sendSecurityError(request, response,
 						"Unknown request verb used: " + request.getMethod());
-
 				return;
 			}
 
 			// no errors detected so forward to the next filter
 			chain.doFilter(request, response);
 		} catch (ServletException se) {
+			AppLogger.log("filter failed:"+ se.getMessage());
 			sendSecurityError(request, response, se.getMessage());
 		}
 	}
