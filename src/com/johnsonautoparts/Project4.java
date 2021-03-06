@@ -394,10 +394,10 @@ public class Project4 extends Project {
 	 * @param header
 	 * @return String
 	 */
-	public String addHeader(String header) {
-		httpResponse.addHeader("X-Header", header);
+	public String addHeader(XHeaders header) {
+		httpResponse.addHeader("X-Header", header.toString());
 
-		return header;
+		return header.toString();
 	}
 
 	/**
@@ -461,7 +461,7 @@ public class Project4 extends Project {
 			String sql = "INSERT INTO COMMENTS(comments) VALUES (?)";
 
 			try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-				stmt.setString(1, comments);
+				stmt.setString(1, Encode.forHtml(comments));
 
 				// execute the insert and return the number of rows
 				int rows = stmt.executeUpdate();
