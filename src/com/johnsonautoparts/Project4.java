@@ -628,13 +628,13 @@ public class Project4 extends Project {
 	public DirContext getLdapContext() throws NamingException {
 		// Set up the environment for creating the initial context
 		Hashtable<String, Object> env = new Hashtable<>();
-		env.put(Context.INITIAL_CONTEXT_FACTORY,
-				"com.sun.jndi.ldap.LdapCtxFactory");
-		env.put(Context.PROVIDER_URL,
-				"ldap://localhost:389/o=JohnsonAutoParts");
+		env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
+		env.put(Context.PROVIDER_URL,"ldap://localhost:636/o=JohnsonAutoParts");
+		env.put(Context.SECURITY_PROTOCOL, "ssl");
+		// Use Georg and his ldap password
+		env.put(Context.SECURITY_PRINCIPAL, "CN=Georg,OU=dev,O=JohnsonAutoParts,DC=liveproject,DC=manning,DC=com");
+		env.put(Context.SECURITY_CREDENTIALS, "georgs_secret");
 
-		// Use anonymous authentication
-		env.put(Context.SECURITY_AUTHENTICATION, "none");
 
 		// Create the initial context and allow NamingException to be thrown
 		return new InitialDirContext(env);
