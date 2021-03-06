@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -581,17 +582,8 @@ public class Project4 extends Project {
 						if (secret == null) {
 							return false;
 						}
-
-						// add the cookie to the response
-						Cookie loginCookie = new Cookie("rememberme", secret);
-
-						// make cookie HttpOnly and Secure to protect the data
-						// in transit
-						loginCookie.setHttpOnly(true);
-						loginCookie.setSecure(true);
-
-						// add the cookie to the response
-						httpResponse.addCookie(loginCookie);
+						// store secret in session - i am a bit unsure why
+					    session.setAttribute("rememberme", secret);
 
 						return true;
 					}
