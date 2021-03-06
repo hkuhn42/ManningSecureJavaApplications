@@ -21,6 +21,9 @@
  %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
+<head>
+<script src="/SecureCodingApp/csrfguard"></script>
+</head>
 <body>
 	<H1>Comment verification for Johnson Autoparts</H1>
 	<br>
