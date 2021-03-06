@@ -20,11 +20,12 @@ import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.function.Function;
+import java.util.Set;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -63,8 +64,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
 import org.owasp.encoder.Encode;
 import org.owasp.html.HtmlPolicyBuilder;
-import org.owasp.html.HtmlSanitizer;
-import org.owasp.html.HtmlStreamEventReceiver;
 import org.owasp.html.PolicyFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -87,6 +86,8 @@ import com.johnsonautoparts.logger.AppLogger;
  * 
  */
 public class Project4 extends Project {
+	
+	private Set<String> redirectWhitelist = new HashSet<>();
 
 	public Project4(Connection connection, HttpServletRequest httpRequest,
 			HttpServletResponse httpResponse) {
@@ -490,6 +491,7 @@ public class Project4 extends Project {
 		}
 	}
 
+	
 	/**
 	 * Project 4, Milestone 2, Task 5
 	 * 
@@ -505,7 +507,12 @@ public class Project4 extends Project {
 	 */
 	public void redirectUser(String location) throws AppException {
 		try {
-			httpResponse.sendRedirect(location);
+			if(redirectWhitelist.contains(location)) {
+				httpResponse.sendRedirect(location);	
+			}
+			throw new AppException(
+					"redirectUser attemted to sendRedirect for invalid location: "
+							+ location);
 		} catch (IOException e) {
 			throw new AppException(
 					"redirectUser caught exception for location: "
@@ -1051,6 +1058,10 @@ public class Project4 extends Project {
 		}
 	}
 	
+	public void whiltelistLocationForRedirect(String location) {
+		redirectWhitelist.add(location);
+	}
+	
 	private static final PolicyFactory BLOG_SANITIZER = new HtmlPolicyBuilder().allowElements("p","table",  "div", "tr", "td").toFactory();
 	
 	/**
@@ -1063,4 +1074,5 @@ public class Project4 extends Project {
 	public static String sanitizeForBlog(String raw) {
 		return BLOG_SANITIZER.sanitize(raw);
 	}	
+	
 }
