@@ -819,6 +819,8 @@ public class Project4 extends Project {
 
 		// add the cookie to the response
 		Cookie prefCookie = new Cookie("pref", encodedToken);
+		prefCookie.setHttpOnly(true);
+		prefCookie.setSecure(true);
 		httpResponse.addCookie(prefCookie);
 
 		// echo pref set
