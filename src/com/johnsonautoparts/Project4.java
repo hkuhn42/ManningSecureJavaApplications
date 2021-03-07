@@ -922,7 +922,15 @@ public class Project4 extends Project {
 	 */
 
 	public String createJwt(String username) throws AppException {
-		final String SECRET = "secret";
+		// use or generate key
+		byte[] secretKey = (byte[]) httpRequest.getSession().getAttribute("jwtSecretKey");
+		if(secretKey == null) {
+			SecureRandom random = new SecureRandom();
+			secretKey = new byte[64];
+			random.nextBytes(secretKey);
+			httpRequest.getSession().setAttribute("jwtSecretKey", secretKey);
+		}
+		
 
 		try {
 			// expire token in 15 minutes
@@ -930,6 +938,9 @@ public class Project4 extends Project {
 			long t = date.getTimeInMillis();
 			Date expirary = new Date(t + (15 * 60000));
 
+			 
+			
+			
 			// create JWT header
 			JsonObject jsonHeader = Json.createObjectBuilder()
 					.add("alg", "none").add("type", "JWT").build();
@@ -957,11 +968,10 @@ public class Project4 extends Project {
 			byte[] hmacMessage = null;
 			try {
 				Mac mac = Mac.getInstance("HmacSHA256");
-				SecretKeySpec secretKeySpec = new SecretKeySpec(
-						SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+				SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, "HmacSHA256");
 				mac.init(secretKeySpec);
-				hmacMessage = mac.doFinal(
-						sbJWT.toString().getBytes(StandardCharsets.UTF_8));
+				hmacMessage = mac.doFinal(sbJWT.toString().getBytes(StandardCharsets.UTF_8));
+				
 			} catch (NoSuchAlgorithmException | InvalidKeyException
 					| IllegalStateException e) {
 				throw new AppException("Failed to calculate hmac-sha256");
