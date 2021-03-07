@@ -86,9 +86,10 @@ public class Project2 extends Project {
 
 		// execute the SQL and return the count of the inventory
 		try {
-			String sql = "SELECT COUNT(id) FROM inventory WHERE id = " + id;
+			String sql = "SELECT COUNT(id) FROM inventory WHERE id = ? ";
 
-			try (Statement stmt = connection.createStatement()) {
+			try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+				stmt.setString(1, id);
 				try (ResultSet rs = stmt.executeQuery(sql)) {
 
 					if (rs.next()) {
