@@ -735,7 +735,7 @@ public class Project4 extends Project {
 		}
 
 		// get the session id to validate role
-		String sessionId = httpRequest.getRequestedSessionId();
+		String sessionId = httpRequest.getSession().getId();
 
 		try {
 			// get the role of a row in the sessions tables that matches the
