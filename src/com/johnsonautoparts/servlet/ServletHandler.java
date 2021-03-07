@@ -40,7 +40,7 @@ public class ServletHandler extends HttpServlet {
 	 * Review the scope of the loginEmail variable at the ServletHandler level
 	 */
 	// keep track of previous email address for verification
-	private String loginEmail = "none@doesnotexist.com";
+//	private String loginEmail = "none@doesnotexist.com";
 
 	
 	/**
@@ -133,11 +133,11 @@ public class ServletHandler extends HttpServlet {
 					 * review the scope of loginEmail
 					 */
 					// store the email to use later
-					loginEmail = loginParams.get("email");
+					String loginEmail = loginParams.get("email");
 
 					// call login
 					boolean loginSuccess = project4.loginEmail(
-							loginParams.get("email"),
+							loginEmail,
 							loginParams.get("password"));
 
 					// build response object
