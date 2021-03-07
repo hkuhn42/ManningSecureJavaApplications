@@ -62,7 +62,6 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.log4j.Logger;
 import org.owasp.encoder.Encode;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
@@ -269,7 +268,7 @@ public class Project4 extends Project {
 								+ txtField);
 			}
 		} catch (IllegalStateException ise) {
-			Logger.getLogger(Project4.class).error("getAttribute failed for "+field, ise);
+			AppLogger.log("getAttribute failed for "+field+" "+ise.getMessage());
 			// return a message
 			return "Ups, an error has occured, please try again or contact support";
 		}
