@@ -656,10 +656,15 @@ public class Project4 extends Project {
 	 * @param str
 	 * @return String
 	 */
-	public String ldapLogin(String userSN, String userPassword)
-			throws AppException {
+	public String ldapLogin(String userSN, String userPassword) throws AppException {
 		DirContext context = null;
 
+		// while this approach is the most secure, it is unrealistic for more complex use cases in most existing ldaps
+		if (!userSN.matches("[\\w\\s]*") || !userPassword.matches("[\\w]*")) {
+			AppLogger.log("username or password contain illegal ldap characters");
+			throw new AppException("Invalid credentials");
+		} 
+		
 		try {
 			context = getLdapContext();
 
@@ -670,8 +675,7 @@ public class Project4 extends Project {
 			String base = "dc=johnsonautoparts,dc=com";
 
 			// The following resolves to (&(sn=S*)(userPassword=*))
-			String filter = "(&(sn=" + userSN + ")(userPassword=" + userPassword
-					+ "))";
+			String filter = "(&(sn=" + userSN + ")(userPassword=" + userPassword+ "))";
 
 			// response string
 			StringBuilder sbResponse = new StringBuilder();
@@ -701,6 +705,7 @@ public class Project4 extends Project {
 			}
 		}
 	}
+
 
 	/**
 	 * Project 4, Milestone 3, Task 4
