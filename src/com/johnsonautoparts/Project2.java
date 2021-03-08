@@ -139,11 +139,10 @@ public class Project2 extends Project {
 
 		// execute the SQL and return the count of the tasks
 		try {
-			String sql = "SELECT COUNT(task_name) FROM schedule WHERE task_name = '"
-					+ taskName + "'";
+			String sql = "SELECT COUNT(task_name) FROM schedule WHERE task_name = ? ";
 			try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 				try (ResultSet rs = stmt.executeQuery()) {
-
+					stmt.setString(1, taskName);
 					if (rs.next()) {
 						return rs.getInt(1);
 					} else {
