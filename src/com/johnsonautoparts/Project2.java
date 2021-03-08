@@ -295,6 +295,7 @@ public class Project2 extends Project {
 	public String unzip(String fileName) throws AppException {
 		final int BUFFER = 512;
 		final int OVERFLOW = 0x1600000; // 25MB
+		final int MAX_FILES = 50; // allow no more than 50 files in a zip
 		Path zipPath = null;
 		try {
 			zipPath = Paths.get("temp", "zip", fileName);
@@ -304,42 +305,39 @@ public class Project2 extends Project {
 
 		// open a stream to the file
 		try (FileInputStream fis = new FileInputStream(zipPath.toString())) {
-			try (ZipInputStream zis = new ZipInputStream(
-					new BufferedInputStream(fis))) {
+			try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis))) {
 				ZipEntry entry;
-
+				int fileCount = 0;
 				// go through each entry in the file
 				while ((entry = zis.getNextEntry()) != null) {
+					if(++fileCount > MAX_FILES) {
+						throw new IllegalStateException("too many files");
+					}
 					AppLogger.log("Extracting zip from filename: " + fileName);
 					int count;
 					byte data[] = new byte[BUFFER];
 					// avoid zip bombs by only allows reasonable size files
-					if (entry.getSize() > OVERFLOW) {
-						throw new IllegalStateException(
-								"zip file exceed max limit");
+					long declaredSize = entry.getSize();
+					if (declaredSize > OVERFLOW) {
+						throw new IllegalStateException("zip file exceed max limit");
 					}
 					// look for illegal size which may be a hint something is
 					// wrong
-					if (entry.getSize() == -1) {
-						throw new IllegalStateException(
-								"zip file entry returned inconsistent size and may be a zip bomb");
+					if (declaredSize == -1) {
+						throw new IllegalStateException("zip file entry returned inconsistent size and may be a zip bomb");
 					}
 
 					// output file is path plus entry
 					Path entryPath = null;
 					try {
-						entryPath = Paths.get(zipPath.toString(),
-								entry.getName());
+						entryPath = Paths.get(zipPath.toString(),entry.getName());
 					} catch (InvalidPathException ipe) {
-						throw new AppException("unzip contains invalid entry: "
-								+ ipe.getMessage());
+						throw new AppException("unzip contains invalid entry: "+ ipe.getMessage());
 					}
 
-					try (FileOutputStream fos = new FileOutputStream(
-							entryPath.toString())) {
-						try (BufferedOutputStream dest = new BufferedOutputStream(
-								fos, BUFFER)) {
-							while ((count = zis.read(data, 0, BUFFER)) != -1) {
+					try (FileOutputStream fos = new FileOutputStream(entryPath.toString())) {
+						try (BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER)) {
+							while ((count = zis.read(data, 0, BUFFER)) != -1 && !(count > declaredSize)) {
 								dest.write(data, 0, count);
 							}
 							dest.flush();
