@@ -183,6 +183,11 @@ public class Project2 extends Project {
 	 * @return String
 	 */
 	public void createFile(String fileName) throws AppException {
+		// check against whilelist of chars 
+		if(!fileName.matches("[a-zA-Z_0-9\\.]+")) {
+			throw new AppException("unsupported characters in filename");
+		}
+		
 		Path tempPath = null;
 		try {
 			tempPath = Paths.get("temp", "upload", fileName);
@@ -772,5 +777,4 @@ public class Project2 extends Project {
 		}
 
 	}
-
 }
