@@ -1,8 +1,23 @@
 package com.johnsonautoparts;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InvalidClassException;
+import java.io.ObjectInputStream;
+import java.io.OutputStream;
+import java.io.StreamCorruptedException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -11,7 +26,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Base64;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -31,6 +45,7 @@ import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.logging.log4j.core.appender.AppenderLoggingException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -38,7 +53,6 @@ import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.johnsonautoparts.exception.AppException;
 import com.johnsonautoparts.logger.AppLogger;
 import com.johnsonautoparts.servlet.SessionConstant;
@@ -250,8 +264,16 @@ public class Project2 extends Project {
 	 * @param str
 	 * @return String
 	 */
-	public String makeSafePath(String dirty) {
-		return dirty.replaceAll("\\.\\." + File.separator, "_");
+	public String makeSafePath(String dirty) throws AppException {
+		dirty = dirty.replaceAll("\\.\\." + File.separator, "_");
+		Path path = new File(dirty).toPath();
+		if(!path.startsWith(Paths.get("temp", "upload"))) {
+			throw new AppException("not a valid path under upload");
+		}
+		if(!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+			throw new AppException("not a regular file");
+		}
+		return dirty;
 	}
 
 	/**
@@ -777,4 +799,5 @@ public class Project2 extends Project {
 		}
 
 	}
+	
 }
