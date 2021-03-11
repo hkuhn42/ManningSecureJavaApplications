@@ -432,6 +432,9 @@ public class Project2 extends Project {
 	 * @return String
 	 */
 	public String evalScript(String printMessage) throws AppException {
+		if (!printMessage.matches("[\\w]*")) {
+			throw new IllegalArgumentException("printMessage contains invalid characters");
+		} 
 		try {
 			ScriptEngineManager manager = new ScriptEngineManager();
 			ScriptEngine engine = manager.getEngineByName("javascript");
