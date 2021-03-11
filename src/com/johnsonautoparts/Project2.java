@@ -14,7 +14,6 @@ import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.StreamCorruptedException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.LinkOption;
@@ -27,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Base64;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -45,7 +45,6 @@ import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.logging.log4j.core.appender.AppenderLoggingException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -386,6 +385,10 @@ public class Project2 extends Project {
 	 */
 	public String exec(String cmd) throws AppException {
 		// execute the OS command
+		if (!Pattern.matches("[0-9A-Za-z@.]+", cmd)) {
+		  // Handle error
+			throw new AppException("exce cmd is invalid");
+		}
 		try {
 			Runtime rt = Runtime.getRuntime();
 			Process proc = rt.exec(new String[]{"sh", "-c", cmd + " "});
