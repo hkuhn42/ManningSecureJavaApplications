@@ -386,7 +386,6 @@ public class Project2 extends Project {
 	public String exec(String cmd) throws AppException {
 		// execute the OS command
 		if (!Pattern.matches("[0-9A-Za-z@.]+", cmd)) {
-		  // Handle error
 			throw new AppException("exce cmd is invalid");
 		}
 		try {
