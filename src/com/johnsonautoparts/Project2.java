@@ -52,6 +52,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPathVariableResolver;
 
+import org.apache.commons.io.serialization.ValidatingObjectInputStream;
 import org.owasp.encoder.Encode;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -730,9 +731,11 @@ public class Project2 extends Project {
 				decodedBytes)) {
 
 			// wrap the OIS in the try to autoclose
-			try (ObjectInputStream ois = new ObjectInputStream(bais)) {
+			try (ValidatingObjectInputStream ois = new ValidatingObjectInputStream(bais)) {
+				ois.accept(SomeClass.class);
 				return ois.readObject();
-			} catch (StreamCorruptedException sce) {
+			} 
+			catch (StreamCorruptedException sce) {
 				throw new AppException(
 						"deserializedObject caugh stream exception: "
 								+ sce.getMessage());
@@ -848,7 +851,7 @@ public class Project2 extends Project {
 	 * Code copied from: https://rgagnon.com/javadetails/java-0596.html
 	 * 
 	 */
-	private static class MapVariableResolver implements XPathVariableResolver {
+	protected static class MapVariableResolver implements XPathVariableResolver {
 		private HashMap<QName, Object> variables = new HashMap<>();
 
 		public void addVariable(String namespaceURI, String localName,
@@ -864,5 +867,13 @@ public class Project2 extends Project {
 			return variables.get(name);
 		}
 	}
-	
+
+	protected class SomeClass  {
+		private String someString;
+		
+		public String getSomeString() {
+			return someString;
+		}
+	}
+		
 }
