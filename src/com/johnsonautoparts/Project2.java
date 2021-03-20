@@ -588,7 +588,16 @@ public class Project2 extends Project {
 	 */
 	public Document parseXML(String xml) throws AppException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
+		// disable entity support
+		try {
+			factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+			factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			factory.setExpandEntityReferences(false);
+		} catch (ParserConfigurationException e) {
+			throw new AppException("parser does not support configuration: " + e.getMessage());
+		}
 		// the code for this XML parse is very rudimentary but is here for
 		// demonstration
 		// purposes to configure the parse to avoid XEE attacks
