@@ -36,9 +36,13 @@ import javax.script.ScriptException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathException;
@@ -541,9 +545,17 @@ public class Project2 extends Project {
 			throw new AppException("validateXML cannot location schema.xsd: "
 					+ ipe.getMessage());
 		}
-
+		Schema schema = null;
+		try {
+			SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+			StreamSource schemaSource = new StreamSource(xsdPath.toFile());
+			schema = schemaFactory.newSchema(schemaSource);
+		} catch (SAXException se) {
+			throw new AppException("validateXML cannot load schema.xsd: "+ se.getMessage());
+		}
+		
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
+		factory.setSchema(schema);
 		// the code for this XML parse is very rudimentary but is here for
 		// demonstration
 		// purposes to work with XML schema validation
