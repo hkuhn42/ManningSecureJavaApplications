@@ -10,7 +10,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InvalidClassException;
-import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.StreamCorruptedException;
 import java.nio.charset.StandardCharsets;
@@ -61,6 +60,8 @@ import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.johnsonautoparts.exception.AppException;
 import com.johnsonautoparts.logger.AppLogger;
 import com.johnsonautoparts.servlet.SessionConstant;
@@ -768,18 +769,17 @@ public class Project2 extends Project {
 	 */
 	public Object deserializeJson(String data) throws AppException {
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.enableDefaultTyping();
-
-		// disable default behavior which has been causing problems
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-				false);
-
+		
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+				.allowIfSubType(User.class)
+				.build();
+		mapper.activateDefaultTyping(ptv);
 		// deserialize the object and return
 		try {
 			return (User) mapper.readValue(data, Object.class);
 		} catch (IOException ioe) {
-			throw new AppException("deserializationJson caught IOException: "
-					+ ioe.getMessage());
+			throw new AppException("deserializationJson caught IOException: "+ ioe.getMessage());
 		}
 
 	}
