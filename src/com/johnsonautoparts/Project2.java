@@ -45,6 +45,7 @@ import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import org.owasp.encoder.Encode;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -479,6 +480,9 @@ public class Project2 extends Project {
 	 * @return String
 	 */
 	public String createXML(String partQuantity) throws AppException {
+		// TODO check if partnQuantity is a number and change method singature
+		// encode input for xml output 
+		partQuantity = Encode.forXml(partQuantity);
 		// build the XML document
 		String xmlContent = "<?xml version=\"1.0\"?>" + "<item>\n"
 				+ "<title>Widget</title>\n" + "<price>500</price>\n"
@@ -487,8 +491,14 @@ public class Project2 extends Project {
 		// build the XML document from the string content
 		Document doc = null;
 		try {
-			DocumentBuilderFactory factory = DocumentBuilderFactory
-					.newInstance();
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			// try to prevent XXE depends on java version and parser 
+			factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+			factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			factory.setExpandEntityReferences(false);
+			
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			InputSource is = new InputSource(xmlContent);
 			doc = builder.parse(is);
