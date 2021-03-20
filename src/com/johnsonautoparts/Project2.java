@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -37,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -48,6 +50,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathVariableResolver;
 
 import org.owasp.encoder.Encode;
 import org.w3c.dom.Document;
@@ -664,9 +667,13 @@ public class Project2 extends Project {
 			// create an XPath query
 			XPathFactory factory = XPathFactory.newInstance();
 			XPath xpath = factory.newXPath();
-			XPathExpression expr = xpath
-					.compile("//users/user[username/text()='" + username
-							+ "' and password/text()='" + passHash + "' ]");
+			// use a variable resolver to prevent injection
+			MapVariableResolver resolver = new MapVariableResolver();
+			xpath.setXPathVariableResolver(resolver);
+			resolver.addVariable(null, "username", username);
+			resolver.addVariable(null, "password", passHash);
+			
+			XPathExpression expr = xpath.compile("//users/user[username/text()=$username and password/text()=$password]");
 
 			// obtain the results
 			Object result = expr.evaluate(doc, XPathConstants.NODESET);
@@ -832,6 +839,30 @@ public class Project2 extends Project {
 					"encryptPassword got algo exception: " + nse.getMessage());
 		}
 
+	}
+	
+	/**
+	 * The following method does not need to be assessed in the project and is
+	 * only here as a helper function
+	 * 
+	 * Code copied from: https://rgagnon.com/javadetails/java-0596.html
+	 * 
+	 */
+	private static class MapVariableResolver implements XPathVariableResolver {
+		private HashMap<QName, Object> variables = new HashMap<>();
+
+		public void addVariable(String namespaceURI, String localName,
+				Object value) {
+			addVariable(new QName(namespaceURI, localName), value);
+		}
+
+		public void addVariable(QName name, Object value) {
+			variables.put(name, value);
+		}
+
+		public Object resolveVariable(QName name) {
+			return variables.get(name);
+		}
 	}
 	
 }
